@@ -1,0 +1,106 @@
+:root {
+  /* Tokyo Night color palette */
+  --color-bg: #1a1b26;
+  --color-bg2: #16161e;
+  --color-bg3: #2d334d;
+  --color-fg: #a9b1d6;
+  --color-fg2: #c0caf5;
+  --color-fg3: #d4d6e0;
+  --color-comment: #565f89;
+  --color-selection: #33467c;
+  --color-blue: #7aa2f7;
+  --color-cyan: #7dcfff;
+  --color-green: #9ece6a;
+  --color-yellow: #e0af68;
+  --color-red: #f7768e;
+  --color-purple: #bb9af7;
+  --color-orange: #ff9e64;
+  --color-magenta: #bb9af7;
+
+  /* Theme variables */
+  --bg-primary: var(--color-bg);
+  --bg-secondary: var(--color-bg2);
+  --bg-tertiary: var(--color-bg3);
+  --text-primary: var(--color-fg);
+  --text-secondary: var(--color-fg2);
+  --text-muted: var(--color-comment);
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-secondary: rgba(255, 255, 255, 0.05);
+}
+
+@layer base {
+  /* Base font settings */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      font-size: 17px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      font-size: 18px;
+    }
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-bg2);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(86, 95, 137, 0.3);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(86, 95, 137, 0.5);
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(122, 162, 247, 0.3);
+    color: var(--color-fg2);
+  }
+/* Selection */
+::selection {
+  background-color: rgba(122, 162, 247, 0.3);
+  color: var(--color-fg2);
+}
+
+/* Custom scrollbar for elements with .custom-scrollbar class */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(86, 95, 137, 0.3) var(--color-bg2);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0.375rem;
+  height: 0.375rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: rgba(22, 22, 30, 0.5);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(86, 95, 137, 0.2);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(86, 95, 137, 0.4);
+}
+}
