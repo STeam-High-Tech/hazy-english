@@ -7,7 +7,7 @@ services:
     restart: always
     container_name: hazy-english
     ports:
-      - "8001:8001"
+      - "8001:80"
       - "8000:8000"
     volumes:
       - ./data:/app/backend/data
