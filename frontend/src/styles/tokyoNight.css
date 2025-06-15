@@ -1,0 +1,171 @@
+  /* Background colors */
+  .bg-tokyo-night-bg {
+    background-color: var(--color-bg);
+  }
+  
+  .bg-tokyo-night-bg2 {
+    background-color: var(--color-bg2);
+  }
+  
+  .bg-tokyo-night-bg2\/80 {
+    background-color: rgba(22, 22, 30, 0.8);
+  }
+  
+  .bg-tokyo-night-bg3 {
+    background-color: var(--color-bg3);
+  }
+  
+  /* Text colors */
+  .text-tokyo-night-fg {
+    color: var(--color-fg);
+  }
+  
+  .text-tokyo-night-comment {
+    color: var(--color-comment);
+  }
+  
+  /* Border colors */
+  .border-tokyo-night-comment {
+    border-color: var(--color-comment);
+  }
+  
+  .border-tokyo-night-comment\/10 {
+    border-color: rgba(86, 95, 137, 0.1);
+  }
+  
+  .border-tokyo-night-comment\/20 {
+    border-color: rgba(86, 95, 137, 0.2);
+  }
+  
+  /* Gradient text colors */
+  .from-tokyo-night-blue {
+    --tw-gradient-from: var(--color-blue);
+    --tw-gradient-to: rgba(122, 162, 247, 0);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  
+  .to-tokyo-night-magenta {
+    --tw-gradient-to: var(--color-magenta);
+  }
+  
+  /* Hover states */
+  .hover\:bg-tokyo-night-selection:hover {
+    background-color: var(--color-selection);
+  }
+  
+  /* Specific colors used in the app */
+  .text-tokyo-night-blue {
+    color: var(--color-blue);
+  }
+  
+  .text-tokyo-night-green {
+    color: var(--color-green);
+  }
+  
+  .text-tokyo-night-red {
+    color: var(--color-red);
+  }
+  
+  /* Additional colors from WordDetails */
+  .bg-tokyo-night-comment\/20 {
+    background-color: rgba(86, 95, 137, 0.2);
+  }
+  
+  .bg-tokyo-night-comment\/30 {
+    background-color: rgba(86, 95, 137, 0.3);
+  }
+  
+  .border-tokyo-night-comment\/20 {
+    border-color: rgba(86, 95, 137, 0.2);
+  }
+  
+  .text-tokyo-night-fg2 {
+    color: var(--color-fg2);
+  }
+  
+  .bg-tokyo-night-bg2\/50 {
+    background-color: rgba(22, 22, 30, 0.5);
+  }
+  
+  .bg-tokyo-night-bg3\/50 {
+    background-color: rgba(45, 51, 77, 0.5);
+  }
+  
+  .bg-tokyo-night-selection {
+    background-color: var(--color-selection);
+  }
+  
+  /* Gradient colors */
+  .from-tokyo-night-cyan {
+    --tw-gradient-from: var(--color-cyan);
+    --tw-gradient-to: rgba(125, 207, 255, 0);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  
+  .to-tokyo-night-cyan {
+    --tw-gradient-to: var(--color-cyan);
+  }
+  
+  /* Opacity utilities */
+  .bg-tokyo-night-bg2\/50 {
+    background-color: rgba(22, 22, 30, 0.5);
+  }
+  
+  .border-tokyo-night-comment\/10 {
+    border-color: rgba(86, 95, 137, 0.1);
+  }
+  
+  .border-tokyo-night-comment\/20 {
+    border-color: rgba(86, 95, 137, 0.2);
+  }
+  
+  .placeholder-tokyo-night-comment\/50::placeholder {
+    color: rgba(86, 95, 137, 0.5);
+  }
+  
+  .hover\:from-tokyo-night-blue\/90:hover {
+    --tw-gradient-from: rgba(122, 162, 247, 0.9);
+    --tw-gradient-to: rgba(122, 162, 247, 0);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  
+  .hover\:to-tokyo-night-cyan\/90:hover {
+    --tw-gradient-to: rgba(125, 207, 255, 0.9);
+  }
+  
+  /* Focus states */
+  .focus\:ring-tokyo-night-blue:focus {
+    --tw-ring-color: rgba(122, 162, 247, 0.5);
+  }
+  
+  .focus\:border-tokyo-night-blue\/50:focus {
+    border-color: rgba(122, 162, 247, 0.5);
+  }
+  
+  /* Text colors */
+  .text-tokyo-night-bg {
+    color: var(--color-bg);
+  }
+  
+  /* Shadow utilities */
+  .shadow-tokyo {
+    --tw-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --tw-shadow-colored: 0 4px 20px -5px var(--tw-shadow-color), 0 10px 10px -5px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+  
+  .hover\:shadow-tokyo-lg:hover {
+    --tw-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --tw-shadow-colored: 0 10px 25px -5px var(--tw-shadow-color), 0 10px 10px -5px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+  
+  .hover\:shadow-tokyo-lg:hover {
+    --tw-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --tw-shadow-colored: 0 10px 25px -5px var(--tw-shadow-color), 0 10px 10px -5px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+  
+  .placeholder-tokyo-night-comment\/30::placeholder {
+    color: rgba(86, 95, 137, 0.3);
+  }

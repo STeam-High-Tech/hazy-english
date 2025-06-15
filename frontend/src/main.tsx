@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './styles/theme.css'; // Import theme first
 import './styles/globals.css';
+import './styles/tokyoNight.css';
 import App from './App';
 
 // Theme context for managing dark/light mode

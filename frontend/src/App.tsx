@@ -78,7 +78,7 @@ function App() {
       </main>
       
       <footer className="text-center py-6 text-tokyo-night-comment text-sm border-t border-tokyo-night-comment/10">
-        <p>Built with <span className="text-tokyo-night-blue">React</span>, <span className="text-tokyo-night-green">Tailwind CSS</span>, and <span className="text-tokyo-night-red">love</span>. Happy learning! 🚀</p>
+        <p>A project of <span className="text-tokyo-night-blue">@hoangneeee</span>. Happy learning! 🚀</p>
       </footer>
     </div>
   );
