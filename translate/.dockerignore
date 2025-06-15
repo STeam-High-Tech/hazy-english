@@ -7,5 +7,7 @@ chart/
 *.yaml
 *.md
 !README.md
-venv
-installed_models
+
+db/
+venv/
+installed_models/

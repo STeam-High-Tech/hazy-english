@@ -1,0 +1,46 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: hazy-english
+    ports:
+      - "8001:8001"
+      - "8000:8000"
+    volumes:
+      - ./data:/app/backend/data
+    environment:
+      - LIBRETRANSLATE_API=http://translate:5000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - hazynet
+
+  translate:
+    build:
+      context: .
+      dockerfile: Dockerfile.translate
+    restart: always
+    container_name: libretranslate
+    ports:
+      - "5500:5000"
+    tty: true
+    volumes:
+      - ./translate/installed_models:/home/libretranslate/.local:rw
+    environment:
+      - LT_UPDATE_MODELS=true
+      - LT_LOAD_ONLY=en,es
+      - CUSTOM_MODEL_PATH=/home/libretranslate/.local
+    healthcheck:
+      test: ['CMD-SHELL', './venv/bin/python scripts/healthcheck.py']
+    networks:
+      - hazynet
+
+networks:
+  hazynet:
+    driver: bridge

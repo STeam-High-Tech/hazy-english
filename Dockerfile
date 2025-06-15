@@ -1,5 +1,5 @@
 # Build frontend
-FROM node:18-alpine as frontend-builder
+FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
@@ -16,7 +16,7 @@ COPY frontend/ .
 RUN npm run build
 
 # Build backend
-FROM python:3.11-slim as backend-builder
+FROM python:3.11-slim AS backend-builder
 
 WORKDIR /app/backend
 
@@ -32,7 +32,7 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Final image
-FROM python:3.11-slim
+FROM python:3.11-slim AS final
 
 WORKDIR /app
 

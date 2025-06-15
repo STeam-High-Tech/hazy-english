@@ -1,5 +1,11 @@
 
 backend/venv
+backend/data
+
+translate/venv
+translate/installed_models
+translate/db
+
 frontend/node_modules
 
 

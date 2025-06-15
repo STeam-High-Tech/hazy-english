@@ -1,4 +1,3 @@
-// src/hooks/useVocabulary.ts
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
@@ -46,7 +45,7 @@ export type WordData = {
   created_at: string;
 };
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://hazy-api.apifree.site';
 
 export function useVocabulary() {
   const [searchTerm, setSearchTerm] = useState('');

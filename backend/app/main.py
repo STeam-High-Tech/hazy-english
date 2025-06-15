@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import requests
 import json
+import os
 from typing import Optional, Dict, Any, List
 
 from . import models, schemas
@@ -22,7 +23,7 @@ app.add_middleware(
 )
 
 # LibreTranslate API endpoint (using a public instance, but you might want to set up your own)
-LIBRETRANSLATE_API = "http://localhost:5500"
+LIBRETRANSLATE_API = os.getenv("LIBRETRANSLATE_API", "http://localhost:5500")
 
 def translate_text(text: str, source_lang: str = "en", target_lang: str = "vi") -> str:
     """Translate text using LibreTranslate API"""
