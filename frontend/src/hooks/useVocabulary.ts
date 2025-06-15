@@ -45,7 +45,7 @@ export type WordData = {
   created_at: string;
 };
 
-const API_URL = 'https://hazy-api.apifree.site';
+const API_URL = 'https://hazy-eng.apifree.site/api';
 
 export function useVocabulary() {
   const [searchTerm, setSearchTerm] = useState('');
