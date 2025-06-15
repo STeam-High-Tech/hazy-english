@@ -1,8 +1,8 @@
 // src/App.tsx
-import { useVocabulary } from './hooks/useVocabulary';
-import { SearchForm } from './components/SearchForm';
-import { SavedWordsList } from './components/SavedWordsList';
-import { WordDetails } from './components/WordDetails';
+import { useVocabulary } from "./hooks/useVocabulary";
+import { SearchForm } from "./components/SearchForm";
+import { SavedWordsList } from "./components/SavedWordsList";
+import { WordDetails } from "./components/WordDetails";
 
 function App() {
   const {
@@ -33,13 +33,23 @@ function App() {
         <div className="flex flex-col gap-6 lg:gap-8">
           {/* Theme Toggle */}
           <div className="flex justify-end">
-            <button 
-              onClick={() => document.documentElement.classList.toggle('dark')}
+            <button
+              onClick={() => document.documentElement.classList.toggle("dark")}
               className="p-2 rounded-lg bg-tokyo-night-bg3 text-tokyo-night-fg hover:bg-tokyo-night-selection transition-colors"
               aria-label="Toggle dark mode"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
               </svg>
             </button>
           </div>
@@ -52,7 +62,7 @@ function App() {
             error={error}
             setError={setError}
           />
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Word Details (chiếm 2 cột trên desktop) */}
             <div className="lg:col-span-2">
@@ -76,9 +86,13 @@ function App() {
           </div>
         </div>
       </main>
-      
+
       <footer className="text-center py-6 text-tokyo-night-comment text-sm border-t border-tokyo-night-comment/10">
-        <p>A project of <span className="text-tokyo-night-blue">@hoangneeee</span>. Happy learning! 🚀</p>
+        <p>
+          A project of{" "}
+          <span className="text-tokyo-night-blue">@hoangneeee</span>. Happy
+          learning! 🚀
+        </p>
       </footer>
     </div>
   );

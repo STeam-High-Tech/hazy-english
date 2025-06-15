@@ -1,7 +1,8 @@
 // src/components/WordDetails.tsx
-import { MagnifyingGlassIcon, SpeakerWaveIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, SpeakerWaveIcon, LanguageIcon } from '@heroicons/react/24/outline';
 import { IconButton } from './IconButton';
 import type { WordData } from '../hooks/useVocabulary';
+import { useState } from 'react';
 
 type WordDetailsProps = {
   wordData: WordData | null;
@@ -29,6 +30,8 @@ const DetailSkeleton = () => (
 );
 
 export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsProps) {
+  const [showVietnamese, setShowVietnamese] = useState(true);
+  
   const audioInfo = wordData?.data.phonetics?.find(p => p.audio);
 
   return (
@@ -73,6 +76,17 @@ export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsPro
             </div>
 
             <div className="space-y-8">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium text-tokyo-night-fg2">Definitions</h3>
+                <button
+                  onClick={() => setShowVietnamese(!showVietnamese)}
+                  className="flex items-center gap-1.5 text-sm text-tokyo-night-blue hover:text-tokyo-night-cyan transition-colors"
+                >
+                  <LanguageIcon className="h-4 w-4" />
+                  {showVietnamese ? 'Hide Vietnamese' : 'Show Vietnamese'}
+                </button>
+              </div>
+              
               {wordData.data.meanings?.map((meaning, index) => (
                 <div key={index} className="group">
                   <div className="flex items-center gap-3 mb-4">
@@ -84,17 +98,37 @@ export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsPro
                   <ul className="space-y-4 pl-2">
                     {meaning.definitions.slice(0, 3).map((def, defIndex) => (
                       <li key={defIndex} className="relative pl-5 before:absolute before:left-0 before:top-3 before:h-1.5 before:w-1.5 before:rounded-full before:bg-tokyo-night-cyan">
-                        <p className="text-tokyo-night-fg">{def.definition}</p>
-                        {def.example && (
-                          <p className="text-sm text-tokyo-night-comment italic mt-2 pl-3 border-l-2 border-tokyo-night-comment/20">
-                            "{def.example}"
-                          </p>
-                        )}
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-tokyo-night-fg">{def.definition}</p>
+                            {showVietnamese && def.vietnamese && (
+                              <p className="text-tokyo-night-green text-sm mt-1">
+                                {def.vietnamese}
+                              </p>
+                            )}
+                          </div>
+                          
+                          {def.example && (
+                            <div className="text-sm text-tokyo-night-comment italic mt-2 pl-3 border-l-2 border-tokyo-night-comment/20">
+                              <p>"{def.example}"</p>
+                              {showVietnamese && def.example_vietnamese && (
+                                <p className="text-tokyo-night-green/80">"{def.example_vietnamese}"</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
+              
+              {showVietnamese && wordData.data.vietnamese?.word && (
+                <div className="mt-6 p-4 bg-tokyo-night-bg3/30 rounded-lg border border-tokyo-night-comment/10">
+                  <h4 className="text-sm font-medium text-tokyo-night-fg2 mb-2">Vietnamese Translation</h4>
+                  <p className="text-tokyo-night-green">{wordData.data.vietnamese.word}</p>
+                </div>
+              )}
             </div>
           </div>
         )}

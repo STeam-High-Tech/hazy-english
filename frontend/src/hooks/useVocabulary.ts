@@ -2,22 +2,46 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+export type License = {
+  name: string;
+  url: string;
+};
+
+export type Phonetic = {
+  text?: string;
+  audio?: string;
+  sourceUrl?: string;
+  license?: License;
+};
+
+export type Definition = {
+  definition: string;
+  example?: string;
+  synonyms: string[];
+  antonyms: string[];
+  vietnamese?: string;
+  example_vietnamese?: string;
+};
+
+export type Meaning = {
+  partOfSpeech: string;
+  definitions: Definition[];
+  synonyms: string[];
+  antonyms: string[];
+};
+
 export type WordData = {
   id: number;
   word: string;
   data: {
-    meanings: Array<{
-      partOfSpeech: string;
-      definitions: Array<{
-        definition: string;
-        example?: string;
-      }>;
-    }>;
-    phonetic?: string;
-    phonetics?: Array<{
-      text?: string;
-      audio?: string;
-    }>;
+    word: string;
+    phonetics: Phonetic[];
+    meanings: Meaning[];
+    license?: License;
+    sourceUrls: string[];
+    vietnamese?: {
+      word: string;
+    };
   };
   created_at: string;
 };
@@ -50,20 +74,38 @@ export function useVocabulary() {
     
     setIsLoading(true);
     setError('');
-    setCurrentWord(null); // Clear previous result
+    setCurrentWord(null);
     
     try {
-      const response = await axios.get(`${API_URL}/lookup?word=${encodeURIComponent(wordToSearch)}`);
+      const response = await axios.post<WordData>(`${API_URL}/lookup?word=${encodeURIComponent(wordToSearch)}`);
       const foundWord = response.data;
       setCurrentWord(foundWord);
       
-      // Tự động cập nhật danh sách đã lưu nếu từ này là từ mới
-      if (!savedWords.some(w => w.id === foundWord.id)) {
+      // Check if word is already in saved words
+      const existingWordIndex = savedWords.findIndex(w => w.word.toLowerCase() === foundWord.word.toLowerCase());
+      
+      if (existingWordIndex === -1) {
+        // Add new word to the beginning of the list
         setSavedWords(prev => [foundWord, ...prev]);
+      } else {
+        // Update existing word
+        setSavedWords(prev => {
+          const updated = [...prev];
+          updated[existingWordIndex] = foundWord;
+          return updated;
+        });
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error searching word:', err);
-      setError(`Sorry, the word "${wordToSearch}" could not be found.`);
+      let errorMessage = `Sorry, the word "${wordToSearch}" could not be found.`;
+      
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
       setCurrentWord(null);
     } finally {
       setIsLoading(false);
@@ -79,9 +121,10 @@ export function useVocabulary() {
         setCurrentWord(null);
         setSearchTerm('');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting word:', err);
-      setError('Failed to delete the word.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete the word.';
+      setError(errorMessage);
     }
   };
 
