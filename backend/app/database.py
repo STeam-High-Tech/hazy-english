@@ -6,12 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-import os
-
 # Create data directory if it doesn't exist
-os.makedirs('data', exist_ok=True)
+db_path = "data/vocab.db"
+if not os.path.exists(db_path):
+    os.makedirs('data', exist_ok=True)
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./data/vocab.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///" + db_path
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
