@@ -1,21 +1,27 @@
+import os
+import logging
+from typing import List, Optional, Dict, Any
+import requests
+from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
 from jose import JWTError, jwt
-import requests
-import json
-import os
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List, Union
+from passlib.context import CryptContext
+from pydantic import BaseModel
 
-from . import models, schemas, auth
+# Import logger configuration
+from .core.logger import app_logger, error_logger
+
+from . import models, schemas
+
 from .database import SessionLocal, engine
 from .auth import (
     get_current_active_user, 
     authenticate_user, 
     create_access_token,
-    get_password_hash,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
 
@@ -31,6 +37,45 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Middleware to log all requests and responses"""
+    start_time = datetime.utcnow()
+    
+    try:
+        response = await call_next(request)
+        process_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        
+        app_logger.info(
+            "Request processed",
+            extra={
+                "method": request.method,
+                "url": str(request.url),
+                "status_code": response.status_code,
+                "process_time_ms": round(process_time, 2),
+                "client": request.client.host if request.client else None,
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        process_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        
+        error_logger.error(
+            "Request processing failed",
+            exc_info=True,
+            extra={
+                "method": request.method,
+                "url": str(request.url),
+                "process_time_ms": round(process_time, 2),
+                "client": request.client.host if request.client else None,
+            }
+        )
+        
+        raise
 
 # LibreTranslate API endpoint (using a public instance, but you might want to set up your own)
 LIBRETRANSLATE_API = os.getenv("LIBRETRANSLATE_API", "http://localhost:5500")
@@ -347,7 +392,16 @@ async def get_words(
         
         return words
     except Exception as e:
-        logger.error(f"Error fetching words: {str(e)}")
+        error_logger.error(
+            "Error fetching words",
+            exc_info=True,
+            extra={
+                "endpoint": "/api/words/",
+                "user_id": current_user.id,
+                "skip": skip,
+                "limit": limit
+            }
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving words from the database"
@@ -404,15 +458,25 @@ async def create_word(
         # Check if word already exists
         db_word = db.query(models.Word).filter(models.Word.word == word.lower()).first()
         if db_word:
+            app_logger.info(
+                "Word already exists in database",
+                extra={"word": word.lower(), "word_id": db_word.id, "user_id": current_user.id}
+            )
             return db_word
             
         # Fetch word data from the API
+        app_logger.info(
+            "Fetching word from external API",
+            extra={"word": word.lower(), "user_id": current_user.id}
+        )
+        
         word_data = get_word_from_api(word)
         if not word_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Word not found in dictionary"
+            app_logger.warning(
+                "Word not found in external API",
+                extra={"word": word.lower(), "user_id": current_user.id}
             )
+            raise HTTPException(status_code=404, detail="Word not found")
             
         # Ensure we have Vietnamese translations
         if 'vietnamese' not in word_data:
@@ -420,17 +484,24 @@ async def create_word(
             
         # Save the word to the database
         db_word = save_word_to_db(db, word_data, word.lower())
+        db.commit()
+        db.refresh(db_word)
+        
+        app_logger.info(
+            "Word saved to database",
+            extra={"word": word.lower(), "word_id": db_word.id, "user_id": current_user.id}
+        )
+        
         return db_word
         
-    except HTTPException:
-        raise
     except Exception as e:
         db.rollback()
-        logger.error(f"Error creating word: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create word"
+        error_logger.error(
+            "Error in create_word",
+            exc_info=True,
+            extra={"word": word.lower(), "user_id": current_user.id}
         )
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/words/{word_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_word(
