@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
-  // BASE_URL: 'https://hazy-eng.apifree.site/api',
-  BASE_URL: 'http://localhost:8000/api',
+  BASE_URL: 'https://hazy-eng.apifree.site/api',
+  // BASE_URL: 'http://localhost:8000/api',
   AUTH: {
     TOKEN: '/token',
   },
