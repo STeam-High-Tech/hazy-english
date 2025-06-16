@@ -1,7 +1,7 @@
 // src/components/SavedWordsList.tsx
 import { SpeakerWaveIcon, TrashIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { IconButton } from './IconButton';
-import type { WordData } from '../hooks/useVocabulary';
+import type { WordData, Phonetic } from '../hooks/useVocabulary';
 
 type SavedWordsListProps = {
   words: WordData[];
@@ -31,7 +31,7 @@ export function SavedWordsList({ words, currentWordId, onSelectWord, onDeleteWor
         {words.length > 0 ? (
           <ul className="divide-y divide-tokyo-night-comment/10">
             {words.map((word) => {
-              const audioInfo = word.data.phonetics?.find(p => p.audio);
+              const audioInfo = word.phonetics?.find((p: Phonetic) => p.audio);
               const isActive = word.id === currentWordId;
               
               return (
@@ -71,7 +71,7 @@ export function SavedWordsList({ words, currentWordId, onSelectWord, onDeleteWor
                     <div className="flex items-center space-x-1.5">
                       {audioInfo?.audio && (
                         <IconButton 
-                          onClick={() => onPlayAudio(audioInfo.audio)}
+                          onClick={() => audioInfo.audio && onPlayAudio(audioInfo.audio)}
                           title="Listen pronunciation"
                           className="text-tokyo-night-comment hover:text-tokyo-night-blue hover:bg-tokyo-night-bg3/50"
                         >

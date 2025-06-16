@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { authAxios } from '../lib/axios';
 
 export type License = {
   name: string;
@@ -7,23 +7,22 @@ export type License = {
 };
 
 export type Phonetic = {
-  text?: string;
-  audio?: string;
-  sourceUrl?: string;
-  license?: License;
+  text: string | null;
+  audio: string | null;
+  source_url: string | null;
+  license_name: string | null;
+  license_url: string | null;
 };
 
 export type Definition = {
   definition: string;
-  example?: string;
-  synonyms: string[];
-  antonyms: string[];
-  vietnamese?: string;
-  example_vietnamese?: string;
+  example: string | null;
+  vietnamese: string | null;
+  example_vietnamese: string | null;
 };
 
 export type Meaning = {
-  partOfSpeech: string;
+  part_of_speech: string;
   definitions: Definition[];
   synonyms: string[];
   antonyms: string[];
@@ -32,20 +31,16 @@ export type Meaning = {
 export type WordData = {
   id: number;
   word: string;
-  data: {
-    word: string;
-    phonetics: Phonetic[];
-    meanings: Meaning[];
-    license?: License;
-    sourceUrls: string[];
-    vietnamese?: {
-      word: string;
-    };
-  };
+  source_urls: string[];
+  vietnamese_word: string | null;
+  license_name: string | null;
+  license_url: string | null;
   created_at: string;
+  phonetics: Phonetic[];
+  meanings: Meaning[];
 };
 
-const API_URL = 'https://hazy-eng.apifree.site/api';
+import { API_CONFIG } from '../config';
 
 export function useVocabulary() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,15 +51,19 @@ export function useVocabulary() {
 
   const fetchSavedWords = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/words`);
+      const response = await authAxios.get(API_CONFIG.WORDS.BASE);
       setSavedWords(response.data);
     } catch (err) {
-      console.error('Error fetching saved words:', err);
-      setError('Failed to load saved words. Please try again later.');
+      const error = err as { response?: { data?: { detail?: string } } };
+      console.error('Error fetching saved words:', error.response?.data?.detail || err);
+      setError(error.response?.data?.detail || 'Failed to fetch saved words');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     fetchSavedWords();
   }, [fetchSavedWords]);
 
@@ -76,7 +75,9 @@ export function useVocabulary() {
     setCurrentWord(null);
     
     try {
-      const response = await axios.post<WordData>(`${API_URL}/lookup?word=${encodeURIComponent(wordToSearch)}`);
+      const response = await authAxios.post<WordData>('/lookup', null, {
+        params: { word: wordToSearch }
+      });
       const foundWord = response.data;
       setCurrentWord(foundWord);
       
@@ -94,15 +95,10 @@ export function useVocabulary() {
           return updated;
         });
       }
-    } catch (err: unknown) {
-      console.error('Error searching word:', err);
-      let errorMessage = `Sorry, the word "${wordToSearch}" could not be found.`;
-      
-      if (axios.isAxiosError(err) && err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
+    } catch (err) {
+      const error = err as { response?: { data?: { detail?: string } } };
+      const errorMessage = error.response?.data?.detail || 'Failed to fetch word details';
+      console.error('Error fetching word details:', errorMessage);
       
       setError(errorMessage);
       setCurrentWord(null);
@@ -113,16 +109,17 @@ export function useVocabulary() {
 
   const deleteWord = async (id: number) => {
     try {
-      await axios.delete(`${API_URL}/words/${id}`);
+      await authAxios.delete(`${API_CONFIG.WORDS.BASE}/${id}`);
       setSavedWords(prev => prev.filter(word => word.id !== id));
       
       if (currentWord?.id === id) {
         setCurrentWord(null);
         setSearchTerm('');
       }
-    } catch (err: unknown) {
-      console.error('Error deleting word:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete the word.';
+    } catch (err) {
+      const error = err as { response?: { data?: { detail?: string } } };
+      const errorMessage = error.response?.data?.detail || 'Failed to delete word';
+      console.error('Error deleting word:', errorMessage);
       setError(errorMessage);
     }
   };

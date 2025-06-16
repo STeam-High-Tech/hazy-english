@@ -32,7 +32,7 @@ const DetailSkeleton = () => (
 export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsProps) {
   const [showVietnamese, setShowVietnamese] = useState(true);
   
-  const audioInfo = wordData?.data.phonetics?.find(p => p.audio);
+  const audioInfo = wordData?.phonetics?.find(p => p.audio);
 
   return (
     <div className="bg-tokyo-night-bg2/80 backdrop-blur-sm border border-tokyo-night-comment/10 rounded-xl overflow-hidden min-h-[400px] flex flex-col shadow-tokyo transition-all duration-300 hover:shadow-tokyo-lg">
@@ -65,7 +65,7 @@ export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsPro
                 )}
                 {audioInfo?.audio && (
                   <IconButton 
-                    onClick={() => onPlayAudio(audioInfo.audio)} 
+                    onClick={() => audioInfo.audio && onPlayAudio(audioInfo.audio)} 
                     title="Listen pronunciation"
                     className="bg-tokyo-night-bg3 hover:bg-tokyo-night-selection text-tokyo-night-blue"
                   >
@@ -87,11 +87,11 @@ export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsPro
                 </button>
               </div>
               
-              {wordData.data.meanings?.map((meaning, index) => (
+              {wordData.meanings?.map((meaning, index) => (
                 <div key={index} className="group">
                   <div className="flex items-center gap-3 mb-4">
                     <h4 className="text-sm font-semibold text-tokyo-night-blue uppercase tracking-wider">
-                      {meaning.partOfSpeech}
+                      {meaning.part_of_speech}
                     </h4>
                     <div className="h-px flex-grow bg-tokyo-night-comment/20 group-hover:bg-tokyo-night-blue/50 transition-colors duration-300"></div>
                   </div>
@@ -123,10 +123,10 @@ export function WordDetails({ wordData, isLoading, onPlayAudio }: WordDetailsPro
                 </div>
               ))}
               
-              {showVietnamese && wordData.data.vietnamese?.word && (
+              {showVietnamese && wordData.vietnamese_word && (
                 <div className="mt-6 p-4 bg-tokyo-night-bg3/30 rounded-lg border border-tokyo-night-comment/10">
                   <h4 className="text-sm font-medium text-tokyo-night-fg2 mb-2">Vietnamese Translation</h4>
-                  <p className="text-tokyo-night-green">{wordData.data.vietnamese.word}</p>
+                  <p className="text-tokyo-night-green">{wordData.vietnamese_word}</p>
                 </div>
               )}
             </div>
