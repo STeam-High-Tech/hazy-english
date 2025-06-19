@@ -5,3 +5,5 @@ venv:
 install_deps:
 	pip install -r requirements.txt
 	
+build_hazy:
+	pyinstaller --onefile hazy_eng.py
