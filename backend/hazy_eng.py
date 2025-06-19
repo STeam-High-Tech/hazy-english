@@ -1,93 +1,152 @@
 import requests
-import os
+from bs4 import BeautifulSoup
 
-TOKEN_FILE = 'token.txt'
+WIKTIONARY_API = "https://vi.wiktionary.org/w/api.php?action=query&format=json&prop=extracts&titles={word}"
 
-def get_token_from_file():
-    if os.path.exists(TOKEN_FILE):
-        with open(TOKEN_FILE, 'r') as f:
-            token = f.read().strip()
-            if token:
-                return token
-    return None
+# Danh sách các loại từ bạn muốn tách ra (theo thứ tự ưu tiên)
+PARTS_OF_SPEECH = {
+    "Tính_từ": "Tính từ",
+    "Danh_từ": "Danh từ",
+    "Trạng_từ": "Trạng từ",
+    "Động_từ": "Động từ",
+    "Giới_từ": "Giới từ",
+    "Liên_từ": "Liên từ",
+    "Đại_từ": "Đại từ",
+    "Thán_từ": "Thán từ",
+    "Phó_từ": "Phó từ",
+    "Mạo_từ": "Mạo từ"
+}
 
-def login_and_save_token(username, password):
-    url = 'https://hazy-eng.apifree.site/api/token'
-    headers = {'accept': 'application/json, text/plain, */*'}
-    data = {'username': username, 'password': password}
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        token = response.json().get('access_token')
-        if token:
-            with open(TOKEN_FILE, 'w') as f:
-                f.write(token)
-            return token
-    print('Lỗi khi lấy token hoặc đăng nhập không thành công')
-    return None
-
-def get_token(username, password):
-    token = get_token_from_file()
-    if token:
-        return token
-    return login_and_save_token(username, password)
-
-def lookup_word(word, token):
-    url = f'https://hazy-eng.apifree.site/api/lookup?word={word}'
-    headers = {'Authorization': f'Bearer {token}'}
-    response = requests.post(url, headers=headers)
+def fetch_wiktionary_entry(word):
+    url = WIKTIONARY_API.format(word=word)
+    response = requests.get(url)
     if response.status_code != 200:
-        print(f'Không tìm thấy từ hoặc có lỗi khi truy cập API. Status code: {response.status_code}')
-        print('Response:', response.text)
+        print("⚠️ Không thể lấy dữ liệu từ Wiktionary.")
+        return None
+    return response.json()
+
+def extract_pronunciation(soup):
+    eng_section = soup.find("h2", {"data-mw-anchor": "Tiếng_Anh"})
+    if not eng_section:
+        return []
+
+    ipa_list = []
+    pron_heading = eng_section.find_next("h3", {"data-mw-anchor": "Cách_phát_âm"})
+    if not pron_heading:
+        return []
+
+    ul = pron_heading.find_next("ul")
+    if ul:
+        for li in ul.find_all("li"):
+            if "IPA" in li.text:
+                ipa_text = li.find("span")
+                if ipa_text:
+                    ipa_list.append(ipa_text.text.strip())
+    return ipa_list
+
+def extract_part_sections(soup, part_map):
+    results = {}
+    eng_section = soup.find("h2", {"data-mw-anchor": "Tiếng_Anh"})
+    if not eng_section:
+        print("❌ Không tìm thấy phần Tiếng Anh.")
+        return results
+
+    # Duyệt các phần sau Tiếng Anh
+    current_tag = eng_section.find_next_sibling()
+    while current_tag:
+        if current_tag.name == "h2":  # Kết thúc phần tiếng Anh
+            break
+        if current_tag.name == "h3":
+            anchor = current_tag.get("data-mw-anchor")
+            if anchor in part_map:
+                part_label = part_map[anchor]
+                meanings = []
+                
+                # Handle different possible structures
+                ol_tag = current_tag.find_next("ol")
+                p_tag = current_tag.find_next("p")
+                
+                # Case 1: Structure with <ol><li>...</li></ol>
+                if ol_tag:
+                    for li in ol_tag.find_all("li", recursive=False):
+                        meaning_text = ""
+                        if li.contents:
+                            # Get text content while preserving HTML formatting
+                            meaning_text = ''.join(str(content) for content in li.contents if not hasattr(content, 'name') or content.name != 'dl').strip()
+                            meaning_text = BeautifulSoup(meaning_text, 'html.parser').get_text().strip()
+                        
+                        examples = []
+                        dl = li.find("dl")
+                        if dl:
+                            for dd in dl.find_all("dd"):
+                                ex_text = dd.get_text(strip=True)
+                                if ex_text:
+                                    examples.append(ex_text)
+                                    
+                        if meaning_text or examples:  # Only add if there's meaningful content
+                            meanings.append({
+                                "meaning": meaning_text,
+                                "examples": examples
+                            })
+                # Case 2: Structure with just <p> after h3
+                elif p_tag and not ol_tag:
+                    meaning_text = p_tag.get_text(strip=True)
+                    if meaning_text:
+                        meanings.append({
+                            "meaning": meaning_text,
+                            "examples": []
+                        })
+                
+                if meanings:  # Only add to results if we found meanings
+                    results[part_label] = meanings
+                    
+        current_tag = current_tag.find_next_sibling()
+    return results
+
+def lookup_word(word):
+    data = fetch_wiktionary_entry(word)
+    if not data:
         return
-    data = response.json()
-    print(f"🔤 Từ: {data.get('word', word).upper()}")
-    print(f"🇻🇳 Nghĩa tiếng Việt: {data.get('vietnamese_word', 'Không có')}")
-    wiki_url = data.get('source_urls', [''])[0]
-    if wiki_url:
-        print(f"📚 Link Wiktionary: {wiki_url}")
-    phonetics = data.get('phonetics', [])
-    if phonetics:
-        print("\n🔊 Phát âm:")
-        for p in phonetics:
-            if p.get('text'):
-                print(f" 📝 {p['text']}")
-            if p.get('audio'):
-                print(f" 🎵 Audio: {p['audio']}")
-    meanings = data.get('meanings', [])
-    if meanings:
-        print("\n📖 Các nghĩa:")
-        for m in meanings:
-            pos = m.get('part_of_speech', 'Không rõ')
-            print(f" 📌 {pos.capitalize()}:")
-            definitions = m.get('definitions', [])
-            for i, d in enumerate(definitions, 1):
-                print(f" {i}. {d.get('definition', 'Không có')}")
-                if d.get('vietnamese'):
-                    print(f" ➡️ {d['vietnamese']}")
-                if d.get('example'):
-                    print(f" 💬 {d['example']}")
-                if d.get('example_vietnamese'):
-                    print(f" 💭 {d['example_vietnamese']}")
-            print()
+
+    page = next(iter(data["query"]["pages"].values()))
+    if "extract" not in page:
+        print("❌ Không có nội dung từ.")
+        return
+    print(f"\n🔤 Từ: {word.upper()}")
+    soup = BeautifulSoup(page["extract"], "html.parser")
+
+    # Phát âm
+    ipa_list = extract_pronunciation(soup)
+    if ipa_list:
+        print("\n🔊 Phát âm (IPA):")
+        for ipa in ipa_list:
+            print(f" 📝 {ipa}")
+
+    # Nghĩa chia theo loại từ
+    results = extract_part_sections(soup, PARTS_OF_SPEECH)
+    if not results:
+        print("❌ Không có phần loại từ nào phù hợp.")
+        return
+
+    for part, meanings in results.items():
+        print(f"\n📌 {part}:")
+        for i, m in enumerate(meanings, 1):
+            print(f" {i}. {m['meaning']}")
+            for ex in m["examples"]:
+                print(f"    💬 {ex}")
     print("\n" + "🌟" * 20 + "\n")
 
 if __name__ == "__main__":
-    username = ''
-    password = ''
-    token = get_token(username, password)
-    if token:
-        print("Nhập 'quit' hoặc nhấn Ctrl+C để thoát.")
-        while True:
-            try:
-                word = input("Nhập từ tiếng Anh cần tra cứu: ").strip()
-                if word.lower() in ['quit', 'exit']:
-                    print("Tạm biệt!")
-                    break
-                if word == '':
-                    continue
-                lookup_word(word, token)
-            except KeyboardInterrupt:
-                print("\nĐã thoát chương trình. Tạm biệt!")
+    print("Nhập 'quit' hoặc nhấn Ctrl+C để thoát.")
+    while True:
+        try:
+            word = input("Nhập từ tiếng Anh cần tra cứu: ").strip()
+            if word.lower() in ['quit', 'exit']:
+                print("Tạm biệt!")
                 break
-    else:
-        print('Không lấy được token, không thể tra cứu từ.')
+            if word == '':
+                continue
+            lookup_word(word)
+        except KeyboardInterrupt:
+            print("\nĐã thoát chương trình. Tạm biệt!")
+            break
