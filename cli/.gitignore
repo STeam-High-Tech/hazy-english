@@ -1,0 +1,6 @@
+Hazy English.spec
+build
+venv
+__pycache__
+dist
+hazy_eng.spec
