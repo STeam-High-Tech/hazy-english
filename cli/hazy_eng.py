@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 WIKTIONARY_API = "https://vi.wiktionary.org/w/api.php?action=query&format=json&prop=extracts&titles={word}"
+DICTIONARY_API = "https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
 
 PARTS_OF_SPEECH = {
     "Tính_từ": "Tính từ",
@@ -34,6 +35,23 @@ def fetch_wiktionary_entry(word: str) -> Optional[dict]:
     response = requests.get(url)
     if response.status_code != 200:
         print("⚠️ Không thể lấy dữ liệu từ Wiktionary.")
+        return None
+    return response.json()
+
+def fetch_dictionary_entry(word: str) -> Optional[dict]:
+    """
+    Fetches word entry data from Dictionary API.
+
+    Args:
+        word (str): The word to look up in Dictionary API
+
+    Returns:
+        dict | None: JSON response from Dictionary API if successful, None otherwise
+    """
+    url = DICTIONARY_API.format(word=word)
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("⚠️ Không thể lấy dữ liệu từ Dictionary API.")
         return None
     return response.json()
 
@@ -145,6 +163,22 @@ def lookup_word(word: str) -> None:
     if not data:
         return
 
+    dictionary_data = fetch_dictionary_entry(word)
+    if not dictionary_data:
+        return
+    
+    # Extract the first available audio URL from phonetics
+    audio_url = None
+    if isinstance(dictionary_data, list) and len(dictionary_data) > 0:
+        for entry in dictionary_data:
+            if 'phonetics' in entry and isinstance(entry['phonetics'], list):
+                for phonetic in entry['phonetics']:
+                    if 'audio' in phonetic and phonetic['audio']:  # Check if audio exists and is not empty
+                        audio_url = phonetic['audio']
+                        break
+                if audio_url:
+                    break
+
     page = next(iter(data["query"]["pages"].values()))
     if "extract" not in page:
         print("❌ Không có nội dung từ.")
@@ -159,7 +193,10 @@ def lookup_word(word: str) -> None:
     if ipa_list:
         print("\n🔊 Phát âm (IPA):")
         for ipa in ipa_list:
-            print(f" 📝 {ipa}")
+            print(f" 📝 {ipa}\n")
+
+    if audio_url:
+        print(f"🔊 Phát âm (Audio): {audio_url}")
 
     # Nghĩa chia theo loại từ
     results = extract_part_sections(soup, PARTS_OF_SPEECH)
